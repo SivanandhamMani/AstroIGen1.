@@ -3270,6 +3270,32 @@ function ChartOutput(props) {
         var headerStyle = function(color){ return {fontSize:"11px",fontWeight:700,color:color,marginBottom:"6px",letterSpacing:"0.5px"}; };
 
         return ce("div",{style:{marginBottom:"12px"}},
+          // Topic info: Main house + Connected bhavas
+          ce("div",{style:{background:C.bg4,border:"1px solid "+C.bdr,borderRadius:"8px",
+            padding:"8px 12px",marginBottom:"8px"}},
+            ce("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"5px",flexWrap:"wrap"}},
+              ce("span",{style:{fontSize:"10px",color:C.muted,minWidth:"90px"}},
+                isTA?"முக்கிய வீடு:":"Main House:"),
+              ce("span",{style:{background:C.bg5,border:"1px solid #cc88ff88",borderRadius:"5px",
+                padding:"2px 8px",fontSize:"11px",color:"#cc88ff",fontWeight:700}},
+                "H"+mainH),
+              ce("span",{style:{fontSize:"10px",color:C.muted}},
+                isTA?BK_TA[mainH]:BK_EN[mainH])
+            ),
+            ce("div",{style:{display:"flex",alignItems:"flex-start",gap:"8px",flexWrap:"wrap"}},
+              ce("span",{style:{fontSize:"10px",color:C.muted,minWidth:"90px",paddingTop:"3px"}},
+                isTA?"பார்க்க வேண்டிய பாவங்கள்:":"Connected Bhavas:"),
+              ce("div",{style:{display:"flex",gap:"5px",flexWrap:"wrap"}},
+                (cTopic.promiseH||[]).map(function(h){
+                  return ce("div",{key:h,style:{background:C.bg5,border:"1px solid #55ddff55",
+                    borderRadius:"5px",padding:"2px 8px",fontSize:"11px"}},
+                    ce("span",{style:{color:"#55ddff",fontWeight:700}},"H"+h+" "),
+                    ce("span",{style:{color:C.muted,fontSize:"10px"}},isTA?BK_TA[h]:BK_EN[h])
+                  );
+                })
+              )
+            )
+          ),
           ce("div",{style:{fontSize:"11px",color:C.acc,fontWeight:700,marginBottom:"8px",letterSpacing:"1px"}},
             "H"+mainH+" CSL: "+pN2(csl)+" | "+(isTA?"நட்சத்திர அதிபதி":"Star Lord")+": "+pN2(starLord)+" | "+(isTA?"உப-அதிபதி":"Sub Lord")+": "+pN2(cslSubl)),
 
@@ -3333,6 +3359,64 @@ function ChartOutput(props) {
               );
             })()
           ),
+
+          // Child infertile warning — ONLY for child topics
+          (cTopic.id==="child"||cTopic.id==="child2"||cTopic.id==="child3") && (function(){
+            var childWarnings = [];
+            // Check 5th bhava CSL rasi for ALL child topics
+            var c5 = cusps && cusps[4] ? cusps[4].subl : null;
+            var c5pos = c5!==null&&c5!==undefined ? positions[c5] : null;
+            var ri5 = c5pos ? c5pos.ri : -1;
+            if (ri5!==-1 && INFERTILE_RASI.indexOf(ri5)!==-1) {
+              childWarnings.push({
+                bhava:5, rasi: isTA?RS_TA[ri5]:RS_EN[ri5],
+                msg: isTA
+                  ? "5ம் பாவம் CSL "+( isTA?RS_TA[ri5]:RS_EN[ri5])+" (மலட்டு ராசி) — முதல் குழந்தை கடைசி குழந்தை. மொத்தம் 1 குழந்தை மட்டுமே."
+                  : "5th bhava CSL in "+(isTA?RS_TA[ri5]:RS_EN[ri5])+" (infertile) — 1st child is the last. Total 1 child only."
+              });
+            }
+            // Check 7th bhava CSL rasi for child2/child3
+            if ((cTopic.id==="child2"||cTopic.id==="child3") && childWarnings.length===0) {
+              var c7 = cusps && cusps[6] ? cusps[6].subl : null;
+              var c7pos = c7!==null&&c7!==undefined ? positions[c7] : null;
+              var ri7 = c7pos ? c7pos.ri : -1;
+              if (ri7!==-1 && INFERTILE_RASI.indexOf(ri7)!==-1) {
+                childWarnings.push({
+                  bhava:7, rasi: isTA?RS_TA[ri7]:RS_EN[ri7],
+                  msg: isTA
+                    ? "7ம் பாவம் CSL "+(isTA?RS_TA[ri7]:RS_EN[ri7])+" (மலட்டு ராசி) — இரண்டாம் குழந்தை கடைசி குழந்தை. மொத்தம் 2 குழந்தைகள் மட்டுமே."
+                    : "7th bhava CSL in "+(isTA?RS_TA[ri7]:RS_EN[ri7])+" (infertile) — 2nd child is the last. Total 2 children only."
+                });
+              }
+            }
+            // Check 9th bhava CSL rasi for child3
+            if (cTopic.id==="child3" && childWarnings.length===0) {
+              var c9 = cusps && cusps[8] ? cusps[8].subl : null;
+              var c9pos = c9!==null&&c9!==undefined ? positions[c9] : null;
+              var ri9 = c9pos ? c9pos.ri : -1;
+              if (ri9!==-1 && INFERTILE_RASI.indexOf(ri9)!==-1) {
+                childWarnings.push({
+                  bhava:9, rasi: isTA?RS_TA[ri9]:RS_EN[ri9],
+                  msg: isTA
+                    ? "9ம் பாவம் CSL "+(isTA?RS_TA[ri9]:RS_EN[ri9])+" (மலட்டு ராசி) — மூன்றாம் குழந்தை கடைசி குழந்தை. மொத்தம் 3 குழந்தைகள் மட்டுமே."
+                    : "9th bhava CSL in "+(isTA?RS_TA[ri9]:RS_EN[ri9])+" (infertile) — 3rd child is the last. Total 3 children only."
+                });
+              }
+            }
+            if (childWarnings.length===0) return null;
+            return ce("div",{style:{background:"#1a0800",border:"1px solid #ff556655",
+              borderLeft:"4px solid #ff5566",borderRadius:"8px",padding:"10px 14px",marginBottom:"8px"}},
+              ce("div",{style:{fontSize:"12px",fontWeight:700,color:"#ff5566",marginBottom:"4px"}},
+                "⚠ "+(isTA?"மலட்டு ராசி எச்சரிக்கை (குழந்தை மட்டும்)":"Infertile Rasi Warning (Child Topics Only)")),
+              childWarnings.map(function(w,i){
+                return ce("div",{key:i,style:{fontSize:"11px",color:"#ffaa44",lineHeight:1.7}}, w.msg);
+              }),
+              ce("div",{style:{fontSize:"10px",color:C.muted,marginTop:"4px"}},
+                isTA
+                  ? "மலட்டு ராசி: மேஷம், ரிஷபம், சிம்மம் — திருமணம், தந்தை போன்ற கேள்விகளுக்கு இந்த விதி பொருந்தாது."
+                  : "Infertile rasi: Aries, Taurus, Leo — This rule does NOT apply to marriage, father or other topics.")
+            );
+          })(),
 
           // Condition 2
           ce("div",{style:Object.assign({},condStyle,{border:"1px solid "+(willHappen?"#44ff8866":"#ff555566")})},
