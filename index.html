@@ -3392,10 +3392,8 @@ function ChartOutput(props) {
         var gender   = rasiIdx!==null?(isTA?(RG_TA[rasiIdx]==="ஆண்"?"ஆண் குணங்கள்":"பெண் குணங்கள்"):(RG_EN[rasiIdx]==="Male"?"Male Characteristics":"Female Characteristics")):"-";
         var isChildTopic = cTopic && (cTopic.id==="child"||cTopic.id==="child2"||cTopic.id==="child3");
         var childGender = rasiIdx!==null?(isTA?(RG_TA[rasiIdx]==="ஆண்"?"👦 ஆண் குழந்தை":"👧 பெண் குழந்தை"):(RG_EN[rasiIdx]==="Male"?"👦 Male Child":"👧 Female Child")):"-";
-        var legs     = rasiIdx!==null?RASI_LEGS[rasiIdx]:null;
         var isProfH  = [1,2,3,6,10].indexOf(mainH2)!==-1;
         var isDiseaseH=[1,6,8].indexOf(mainH2)!==-1;
-        var isChildH = [5,7,9].indexOf(mainH2)!==-1;
 
         function infoRow(label,val,color){
           return ce("div",{style:{display:"flex",gap:"8px",alignItems:"flex-start",
@@ -3439,8 +3437,6 @@ function ChartOutput(props) {
               isProfH && infoRow(isTA?"தொழில் வர்ணம்":"Profession/Varna",
                 varna+" — "+varnaProf, "#ffcc44"),
               isDiseaseH && infoRow(isTA?"நோய் பகுதி":"Body Part (disease)", bodyPart, "#ff8888"),
-              isChildH && legs!==null && infoRow(isTA?"குழந்தைகள் எண்ணிக்கை":"Child Count (legs)",
-                legs===1?"One child likely":legs===2?"Two children likely":legs===4?"Multiple children possible":"Many children possible", "#44ff88")
             )
           )
         );
