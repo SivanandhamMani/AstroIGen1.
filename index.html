@@ -32,7 +32,7 @@
       if (!fbDb) return Promise.resolve(3);
       return fbDb.collection("users").doc(uid).get().then(function(doc) {
         if (doc.exists) return doc.data().coins || 0;
-        return fbDb.collection("users").doc(uid).set({ coins: 3, createdAt: new Date() }).then(function(){ return 3; });
+        return fbDb.collection("users").doc(uid).set({ coins: 5, createdAt: new Date() }).then(function(){ return 5; });
       });
     }
     function fbSetCoins(uid, amount) {
@@ -72,22 +72,21 @@
           referrerUid: referrerUid,
           timestamp: new Date(),
           newUserBonus: 5,
-          referrerBonus: 3
+          referrerBonus: 5
         }).then(function() {
-          // Give new user 5 extra coins (total 8 — set to 8 directly)
-          return fbDb.collection("users").doc(newUid).update({ coins: 8 });
+          // Give new user 5 extra coins on top of base 5 = total 10
+          return fbDb.collection("users").doc(newUid).update({ coins: 10 });
         }).then(function() {
-          // Give referrer +3 coins
+          // Give referrer +5 coins
           return fbDb.collection("users").doc(referrerUid).get();
         }).then(function(refDoc) {
           if (!refDoc.exists) return;
           var current = refDoc.data().coins || 0;
-          var newTotal = current + 3;
+          var newTotal = current + 5;
           return fbDb.collection("users").doc(referrerUid).update({ coins: newTotal });
         }).then(function() {
-          // Log transactions for both
           fbLogTransaction(newUid, "referral_bonus", 5, "Joined via referral link");
-          fbLogTransaction(referrerUid, "referral_reward", 3, "Referral: "+newEmail);
+          fbLogTransaction(referrerUid, "referral_reward", 5, "Referral: "+newEmail);
         });
       });
     }
@@ -11816,7 +11815,7 @@ function App() {
   // ── Social Share with coin deduction
   function handleSharePlatform(platform, isGroup) {
     if (!fbUser) { setShowAuthModal(true); setShowShareModal(false); return; }
-    var cost = 5;
+    var cost = 2;
     var platformName = platform;
     if (!deductCoins(cost, "Share via " + platformName)) return;
     var url = window.location.href;
@@ -12066,7 +12065,7 @@ function App() {
             ?"Login to access your coins and chart history"
             : (getReferralFromURL()
                 ? ce("div",{style:{padding:"8px",background:"rgba(200,168,75,0.12)",border:"1px solid "+C.bdrGold,borderRadius:"7px",color:C.acc2,fontWeight:700}},
-                    "🎁 "+(isTA?"ரெஃபரல் இணைப்பு! பதிவு செய்தால் 🪙 8 நாணயங்கள் பெறுவீர்கள்!":"Referral link! Register now and get 🪙 8 coins!"))
+                    "🎁 "+(isTA?"ரெஃபரல் இணைப்பு! பதிவு செய்தால் 🪙 10 நாணயங்கள் பெறுவீர்கள்!":"Referral link! Register now and get 🪙 10 coins!"))
                 : "Create account — get 3 free coins instantly"
               )
         ),
@@ -12331,7 +12330,7 @@ function App() {
           ce("span",{style:{fontSize:"15px",fontWeight:800,color:C.acc2}},
             isTA?"பகிர்":"Share"),
           ce("span",{style:{fontSize:"12px",color:C.muted}},
-            isTA?"🪙 5 நாணயங்கள் — எந்த app வேண்டுமானாலும்":"🪙 5 coins — opens all apps on your phone")
+            isTA?"🪙 2 நாணயங்கள் — எந்த app வேண்டுமானாலும்":"🪙 2 coins — opens all apps on your phone")
         ),
 
         // ── Coin balance note
@@ -12351,8 +12350,8 @@ function App() {
             "🎁 "+(isTA?"உங்கள் ரெஃபரல் இணைப்பு":"Your Referral Link")),
           ce("div",{style:{fontSize:"10px",color:C.muted,marginBottom:"8px",lineHeight:1.6}},
             isTA
-              ?"இந்த இணைப்பு மூலம் யாரேனும் பதிவு செய்தால் — நீங்கள் 🪙 3, அவர்கள் 🪙 8 நாணயங்கள் பெறுவார்கள்!"
-              :"Someone registers via your link → you get 🪙 3 coins, they get 🪙 8 coins!"),
+              ?"இந்த இணைப்பு மூலம் யாரேனும் பதிவு செய்தால் — நீங்கள் 🪙 5, அவர்கள் 🪙 10 நாணயங்கள் பெறுவார்கள்!"
+              :"Someone registers via your link → you get 🪙 5 coins, they get 🪙 10 coins!"),
           ce("div",{style:{
             background:C.bg4,borderRadius:"8px",padding:"8px 10px",
             border:"1px solid "+(isDark?C.bdrGold:"#d4b86a"),
