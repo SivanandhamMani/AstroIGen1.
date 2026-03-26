@@ -11815,6 +11815,7 @@ function App() {
 
   // ── Social Share with coin deduction
   function handleSharePlatform(platform, isGroup) {
+    console.log("handleSharePlatform called", platform, "fbUser:", !!fbUser, "coins:", coins);
     if (!fbUser) { setShowAuthModal(true); setShowShareModal(false); return; }
     var cost = 2;
     var url = window.location.href;
@@ -11822,43 +11823,43 @@ function App() {
       ? "AstroIGen — KP ஜோதிட மென்பொருள். இலவசமாக பயன்படுத்துங்கள்: "
       : "AstroIGen — Free KP Astrology Software. Try it here: ") + url;
 
-    // ── Native Share (Web Share API) — deduct only after confirmed ──
+    // ── Native Share (Web Share API) ──
     if (platform === "Native") {
+      console.log("navigator.share available:", !!navigator.share);
       if (navigator.share) {
-        // Pre-check balance without deducting yet
+        console.log("isUnlimited:", isUnlimited, "coins:", coins, "cost:", cost);
         if (!isUnlimited && coins < cost) {
           setCoinMsg({ type:"error", text:"Insufficient coins! Need "+cost+" coins to share. Balance: "+coins });
           setShowCoinModal(true);
           return;
         }
+        console.log("Calling navigator.share...");
         navigator.share({
           title: "AstroIGen — KP Astrology",
           text: isTA ? "AstroIGen — KP ஜோதிட மென்பொருள். இலவசமாக பயன்படுத்துங்கள்!" : "AstroIGen — Free KP Astrology Software. Try it!",
           url: url
-        }).then(function() {
+        }).then(function(){
           deductCoins(cost, "Native Share");
           setShareMsg({ type:"success", text:(isTA?"பகிர்வு வெற்றி! "+cost+" நாணயங்கள் பயன்படுத்தப்பட்டன.":"Shared successfully! "+cost+" coins used.") });
           setTimeout(function(){ setShareMsg(null); }, 3000);
-        }).catch(function(err) {
-          if (err.name === "AbortError") {
-            setShareMsg({ type:"error", text:(isTA?"பகிர்வு ரத்து செய்யப்பட்டது. நாணயங்கள் பயன்படுத்தப்படவில்லை.":"Share cancelled. No coins deducted.") });
-          } else {
+        }).catch(function(err){
+          if (err.name !== "AbortError") {
             setShareMsg({ type:"error", text:(isTA?"பகிர்வு தோல்வி. மீண்டும் முயற்சிக்கவும்.":"Share failed. Please try again.") });
+            setTimeout(function(){ setShareMsg(null); }, 3000);
           }
-          setTimeout(function(){ setShareMsg(null); }, 3000);
         });
       } else {
         // Fallback: copy to clipboard
         if (!deductCoins(cost, "Copy Link")) return;
         if (navigator.clipboard) navigator.clipboard.writeText(text);
-        else { var ta3=document.createElement("textarea"); ta3.value=text; ta3.style.cssText="position:fixed;top:0;left:0;opacity:0;pointer-events:none;"; document.body.appendChild(ta3); ta3.focus(); ta3.select(); document.execCommand("copy"); document.body.removeChild(ta3); }
+        else { var ta3=document.createElement("textarea"); ta3.value=text; document.body.appendChild(ta3); ta3.select(); document.execCommand("copy"); document.body.removeChild(ta3); }
         setShareMsg({ type:"success", text:(isTA?"இணைப்பு நகலெடுக்கப்பட்டது! "+cost+" நாணயங்கள் பயன்படுத்தப்பட்டன.":"Link copied! "+cost+" coins used.") });
         setTimeout(function(){ setShareMsg(null); }, 4000);
       }
       return;
     }
 
-    // ── Instagram — deduct then copy ──
+    // ── Instagram ──
     if (platform === "Instagram") {
       if (!deductCoins(cost, "Instagram Share")) return;
       if (navigator.clipboard) navigator.clipboard.writeText(text);
@@ -11868,7 +11869,7 @@ function App() {
       return;
     }
 
-    // ── WhatsApp / Facebook / Threads — deduct then open ──
+    // ── WhatsApp / Facebook / Threads ──
     var shareUrl = "";
     if (platform === "WhatsApp") {
       shareUrl = "https://wa.me/?text=" + encodeURIComponent(text);
